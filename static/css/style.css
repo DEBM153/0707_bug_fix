@@ -1,0 +1,152 @@
+.app-page,
+.app-page * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.app-page {
+    min-height: 100vh;
+    background: #f4f6fb;
+    color: #333333;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #ffffff;
+}
+
+.navbar__brand {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.navbar__menu {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.navbar__text {
+    color: #ffffff;
+}
+
+.navbar__link {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.navbar__link:hover {
+    text-decoration: underline;
+}
+
+.main-container {
+    width: min(960px, calc(100% - 32px));
+    margin: 40px auto;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 10px 28px rgba(30, 42, 80, 0.14);
+    padding: 28px;
+}
+
+.login-card {
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.card__title {
+    margin-bottom: 20px;
+    font-size: 26px;
+    color: #222222;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form__group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form__label {
+    font-weight: 600;
+    color: #333333;
+}
+
+.form__input {
+    width: 100%;
+    border: 1px solid #d4d9e8;
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 16px;
+}
+
+.form__input:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    border: 0;
+    border-radius: 6px;
+    background: #667eea;
+    color: #ffffff;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.button:hover {
+    background: #566bd1;
+}
+
+.button--link {
+    margin-top: 20px;
+}
+
+.alert {
+    margin-bottom: 16px;
+    border-radius: 6px;
+    padding: 12px 14px;
+}
+
+.alert--error {
+    background: #fff0f0;
+    color: #c62828;
+}
+
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+}
+
+.user-list__item {
+    border-bottom: 1px solid #edf0f6;
+    padding: 10px 0;
+}
+
+.user-list__label {
+    font-weight: 700;
+    color: #222222;
+}

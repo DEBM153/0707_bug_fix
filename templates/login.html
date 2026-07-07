@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card login-card">
+    <h1 class="card__title">登录</h1>
+
+    {% if error %}
+        <div class="alert alert--error">{{ error }}</div>
+    {% endif %}
+
+    <form class="form" method="post" action="/login">
+        <div class="form__group">
+            <label class="form__label" for="username">用户名</label>
+            <input class="form__input" type="text" id="username" name="username" placeholder="请输入用户名">
+        </div>
+
+        <div class="form__group">
+            <label class="form__label" for="password">密码</label>
+            <input class="form__input" type="password" id="password" name="password" placeholder="请输入密码">
+        </div>
+
+        <button class="button" type="submit">登录</button>
+    </form>
+</section>
+{% endblock %}
