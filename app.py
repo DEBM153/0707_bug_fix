@@ -1,4 +1,4 @@
-import os
+import sqlite3, os
 import secrets
 
 from flask import Flask, render_template, request, redirect, session
@@ -6,6 +6,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "data", "users.db")
 
 
 USERS = {
@@ -25,6 +28,35 @@ USERS = {
     },
 }
 
+
+def init_db():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT,
+            email TEXT,
+            phone TEXT
+        )
+    """)
+    cursor.execute("""
+        INSERT OR IGNORE INTO users (username, password, email, phone)
+        VALUES ('admin', 'admin123', 'admin@example.com', '13800138000')
+    """)
+    cursor.execute("""
+        INSERT OR IGNORE INTO users (username, password, email, phone)
+        VALUES ('alice', 'alice2025', 'alice@example.com', '13900139001')
+    """)
+    conn.commit()
+    conn.close()
+
+
+init_db()
+
+
 def get_user(username):##新增一个函数，只部分返回用户信息
     user=USERS.get(username)
     if not user:
@@ -42,12 +74,13 @@ def get_user(username):##新增一个函数，只部分返回用户信息
 def index():
     username = session.get("username")
     user = get_user(username) if username else None
-    return render_template("index.html", user=user)
+    return render_template("index.html", user=user, keyword="", search_results=None)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     error = None
+    message = request.args.get("message", "")
 
     if request.method == "POST":
         username = request.form.get("username", "")
@@ -61,7 +94,52 @@ def login():
 
         error = "用户名或密码错误"
 
-    return render_template("login.html", error=error)
+    return render_template("login.html", error=error, message=message)
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    error = None
+
+    if request.method == "POST":
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+        email = request.form.get("email", "")
+        phone = request.form.get("phone", "")
+
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        sql = f"INSERT INTO users (username, password, email, phone) VALUES ('{username}', '{password}', '{email}', '{phone}')"
+        try:
+            cursor.execute(sql)
+            conn.commit()
+            return redirect("/login?message=注册成功，请登录")
+        except sqlite3.Error as e:
+            error = str(e)
+        finally:
+            conn.close()
+
+    return render_template("register.html", error=error)
+
+
+@app.route("/search")
+def search():
+    username = session.get("username")
+    user = get_user(username) if username else None
+    keyword = request.args.get("keyword", "")
+    search_results = []
+
+    if keyword:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        sql = f"SELECT * FROM users WHERE username LIKE '%{keyword}%' OR email LIKE '%{keyword}%'"
+        print(sql)
+        cursor.execute(sql)
+        search_results = cursor.fetchall()
+        conn.close()
+
+    return render_template("index.html", user=user, keyword=keyword, search_results=search_results)
 
 
 @app.route("/logout")

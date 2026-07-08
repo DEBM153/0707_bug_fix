@@ -2,17 +2,13 @@
 
 {% block content %}
 <section class="card login-card">
-    <h1 class="card__title">登录</h1>
+    <h1 class="card__title">注册</h1>
 
     {% if error %}
         <div class="alert alert--error">{{ error }}</div>
     {% endif %}
 
-    {% if message %}
-        <div class="alert alert--success">{{ message }}</div>
-    {% endif %}
-
-    <form class="form" method="post" action="/login">
+    <form class="form" method="post" action="/register">
         <div class="form__group">
             <label class="form__label" for="username">用户名</label>
             <input class="form__input" type="text" id="username" name="username" placeholder="请输入用户名">
@@ -23,7 +19,17 @@
             <input class="form__input" type="password" id="password" name="password" placeholder="请输入密码">
         </div>
 
-        <button class="button" type="submit">登录</button>
+        <div class="form__group">
+            <label class="form__label" for="email">邮箱</label>
+            <input class="form__input" type="email" id="email" name="email" placeholder="请输入邮箱">
+        </div>
+
+        <div class="form__group">
+            <label class="form__label" for="phone">手机号</label>
+            <input class="form__input" type="text" id="phone" name="phone" placeholder="请输入手机号">
+        </div>
+
+        <button class="button" type="submit">注册</button>
     </form>
 </section>
 {% endblock %}

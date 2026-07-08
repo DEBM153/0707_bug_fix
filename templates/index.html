@@ -13,6 +13,38 @@
             <li class="user-list__item"><span class="user-list__label">余额：</span>{{ user.balance }}</li>
         </ul>
 
+        <form class="search-form" method="get" action="/search">
+            <input class="form__input search-form__input" type="text" name="keyword" value="{{ keyword }}" placeholder="搜索用户名或邮箱">
+            <button class="button" type="submit">搜索</button>
+        </form>
+
+        {% if keyword %}
+            {% if search_results %}
+                <table class="result-table">
+                    <thead class="result-table__head">
+                        <tr class="result-table__row">
+                            <th class="result-table__cell">ID</th>
+                            <th class="result-table__cell">用户名</th>
+                            <th class="result-table__cell">邮箱</th>
+                            <th class="result-table__cell">手机</th>
+                        </tr>
+                    </thead>
+                    <tbody class="result-table__body">
+                        {% for item in search_results %}
+                            <tr class="result-table__row">
+                                <td class="result-table__cell">{{ item.id }}</td>
+                                <td class="result-table__cell">{{ item.username }}</td>
+                                <td class="result-table__cell">{{ item.email }}</td>
+                                <td class="result-table__cell">{{ item.phone }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-result">无搜索结果</div>
+            {% endif %}
+        {% endif %}
+
         <a class="button button--link" href="/logout">退出登录</a>
     </section>
 {% else %}

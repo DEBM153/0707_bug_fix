@@ -11,3 +11,5 @@ flask_*.log
 
 ~$*.docx
 keydir/
+data/*.db
+cookies.txt

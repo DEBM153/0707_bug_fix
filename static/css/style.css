@@ -134,6 +134,11 @@
     color: #c62828;
 }
 
+.alert--success {
+    background: #ecfdf3;
+    color: #16703c;
+}
+
 .user-list {
     display: flex;
     flex-direction: column;
@@ -149,4 +154,35 @@
 .user-list__label {
     font-weight: 700;
     color: #222222;
+}
+
+.search-form {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.search-form__input {
+    max-width: 360px;
+}
+
+.result-table {
+    width: 100%;
+    margin-top: 18px;
+    border-collapse: collapse;
+}
+
+.result-table__head {
+    background: #f4f6fb;
+}
+
+.result-table__cell {
+    border: 1px solid #dfe4ef;
+    padding: 10px 12px;
+    text-align: left;
+}
+
+.empty-result {
+    margin-top: 18px;
+    color: #666666;
 }
