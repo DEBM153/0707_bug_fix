@@ -13,3 +13,5 @@ flask_*.log
 keydir/
 data/*.db
 cookies.txt
+static/uploads/*
+!static/uploads/.gitkeep

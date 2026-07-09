@@ -12,6 +12,7 @@
         <div class="navbar__menu">
             {% if session.get("username") %}
                 <span class="navbar__text">欢迎，{{ session.get("username") }}</span>
+                <a class="navbar__link" href="/upload">上传头像</a>
                 <a class="navbar__link" href="/logout">退出</a>
             {% else %}
                 <a class="navbar__link" href="/login">登录</a>

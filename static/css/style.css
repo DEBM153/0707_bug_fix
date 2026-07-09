@@ -63,6 +63,11 @@
     margin: 0 auto;
 }
 
+.upload-card {
+    max-width: 560px;
+    margin: 0 auto;
+}
+
 .card__title {
     margin-bottom: 20px;
     font-size: 26px;
@@ -185,4 +190,30 @@
 .empty-result {
     margin-top: 18px;
     color: #666666;
+}
+
+.upload-result {
+    margin-top: 24px;
+}
+
+.upload-result__title {
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #222222;
+}
+
+.upload-result__link {
+    display: inline-block;
+    margin-bottom: 14px;
+    color: #667eea;
+    word-break: break-all;
+}
+
+.upload-result__image {
+    display: block;
+    max-width: 220px;
+    max-height: 220px;
+    border: 1px solid #dfe4ef;
+    border-radius: 8px;
+    object-fit: cover;
 }

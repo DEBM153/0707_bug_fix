@@ -1,14 +1,17 @@
 import sqlite3, os
 import secrets
 
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "users.db")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 USERS = {
@@ -31,6 +34,7 @@ USERS = {
 
 def init_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
@@ -140,6 +144,29 @@ def search():
         conn.close()
 
     return render_template("index.html", user=user, keyword=keyword, search_results=search_results)
+
+
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+    if not session.get("username"):
+        return redirect("/login")
+
+    error = None
+    file_url = None
+    filename = None
+
+    if request.method == "POST":
+        uploaded_file = request.files.get("avatar")
+
+        if not uploaded_file or uploaded_file.filename == "":
+            error = "请选择要上传的文件"
+        else:
+            filename = uploaded_file.filename
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            uploaded_file.save(save_path)
+            file_url = url_for("static", filename=f"uploads/{filename}")
+
+    return render_template("upload.html", error=error, file_url=file_url, filename=filename)
 
 
 @app.route("/logout")
