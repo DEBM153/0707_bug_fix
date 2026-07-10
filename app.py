@@ -1,7 +1,9 @@
 import sqlite3, os
 import secrets
+from decimal import Decimal, InvalidOperation
+from functools import wraps
 
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, abort, render_template, request, redirect, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -43,16 +45,24 @@ def init_db():
             username TEXT UNIQUE,
             password TEXT,
             email TEXT,
-            phone TEXT
+            phone TEXT,
+            balance REAL DEFAULT 0
         )
     """)
+
+    columns = [column[1] for column in cursor.execute("PRAGMA table_info(users)").fetchall()]
+    if "balance" not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN balance REAL DEFAULT 0")
+        cursor.execute("UPDATE users SET balance = 99999 WHERE username = 'admin'")
+        cursor.execute("UPDATE users SET balance = 100 WHERE username = 'alice'")
+
     cursor.execute("""
-        INSERT OR IGNORE INTO users (username, password, email, phone)
-        VALUES ('admin', 'admin123', 'admin@example.com', '13800138000')
+        INSERT OR IGNORE INTO users (username, password, email, phone, balance)
+        VALUES ('admin', 'admin123', 'admin@example.com', '13800138000', 99999)
     """)
     cursor.execute("""
-        INSERT OR IGNORE INTO users (username, password, email, phone)
-        VALUES ('alice', 'alice2025', 'alice@example.com', '13900139001')
+        INSERT OR IGNORE INTO users (username, password, email, phone, balance)
+        VALUES ('alice', 'alice2025', 'alice@example.com', '13900139001', 100)
     """)
     conn.commit()
     conn.close()
@@ -61,16 +71,60 @@ def init_db():
 init_db()
 
 
+def csrf_token():
+    token = session.get("_csrf_token")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["_csrf_token"] = token
+    return token
+
+
+app.jinja_env.globals["csrf_token"] = csrf_token
+
+
+@app.before_request
+def protect_csrf():
+    if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+        expected_token = session.get("_csrf_token", "")
+        submitted_token = request.form.get("csrf_token", "")
+
+        if not expected_token or not submitted_token:
+            abort(400, description="CSRF token missing")
+
+        if not secrets.compare_digest(expected_token, submitted_token):
+            abort(400, description="CSRF token invalid")
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        username = session.get("username")
+        if not username or username not in USERS:
+            session.clear()
+            return redirect(url_for("login"))
+        return view(*args, **kwargs)
+
+    return wrapped_view
+
+
 def get_user(username):##新增一个函数，只部分返回用户信息
     user=USERS.get(username)
     if not user:
         return None
 
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    db_user = conn.execute(
+        "SELECT id, balance FROM users WHERE username = ?", (username,)
+    ).fetchone()
+    conn.close()
+
     return {
+        "id":db_user["id"] if db_user else None,
         "username":username,
         "phone":user["phone"],
         "email":user["email"],
-        "balance":user["balance"],
+        "balance":db_user["balance"] if db_user else user["balance"],
         "role":user["role"]
     }
 
@@ -146,11 +200,81 @@ def search():
     return render_template("index.html", user=user, keyword=keyword, search_results=search_results)
 
 
-@app.route("/upload", methods=["GET", "POST"])
-def upload():
-    if not session.get("username"):
-        return redirect("/login")
+def get_profile_user(username):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    profile_user = conn.execute(
+        "SELECT id, username, email, phone, balance FROM users WHERE username = ?",
+        (username,),
+    ).fetchone()
+    conn.close()
+    return profile_user
 
+
+@app.route("/profile")
+@login_required
+def profile():
+    profile_user = get_profile_user(session["username"])
+    message = request.args.get("message", "")
+
+    if not profile_user:
+        return render_template("profile.html", profile_user=None), 404
+
+    return render_template("profile.html", profile_user=profile_user, message=message)
+
+
+@app.route("/recharge", methods=["POST"])
+@login_required
+def recharge():
+    username = session["username"]
+    raw_amount = request.form.get("amount", "").strip()
+
+    try:
+        amount = Decimal(raw_amount)
+        if not amount.is_finite():
+            raise InvalidOperation
+        amount = amount.quantize(Decimal("0.01"))
+    except InvalidOperation:
+        profile_user = get_profile_user(username)
+        return render_template(
+            "profile.html",
+            profile_user=profile_user,
+            error="充值金额格式错误",
+        ), 400
+
+    if amount <= 0:
+        profile_user = get_profile_user(username)
+        return render_template(
+            "profile.html",
+            profile_user=profile_user,
+            error="充值金额必须大于 0",
+        ), 400
+
+    if amount > Decimal("100000"):
+        profile_user = get_profile_user(username)
+        return render_template(
+            "profile.html",
+            profile_user=profile_user,
+            error="单次充值金额不能超过 100000",
+        ), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.execute(
+        "UPDATE users SET balance = ROUND(balance + ?, 2) WHERE username = ?",
+        (float(amount), username),
+    )
+    conn.commit()
+    conn.close()
+
+    if cursor.rowcount != 1:
+        return "用户不存在", 404
+
+    return redirect(url_for("profile", message="充值成功"))
+
+
+@app.route("/upload", methods=["GET", "POST"])
+@login_required
+def upload():
     error = None
     file_url = None
     filename = None

@@ -68,6 +68,11 @@
     margin: 0 auto;
 }
 
+.profile-card {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
 .card__title {
     margin-bottom: 20px;
     font-size: 26px;
@@ -126,6 +131,12 @@
 
 .button--link {
     margin-top: 20px;
+}
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .alert {
@@ -190,6 +201,10 @@
 .empty-result {
     margin-top: 18px;
     color: #666666;
+}
+
+.recharge-form {
+    margin-top: 24px;
 }
 
 .upload-result {

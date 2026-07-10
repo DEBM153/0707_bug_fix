@@ -9,6 +9,7 @@
     {% endif %}
 
     <form class="form" method="post" action="/register">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form__group">
             <label class="form__label" for="username">用户名</label>
             <input class="form__input" type="text" id="username" name="username" placeholder="请输入用户名">

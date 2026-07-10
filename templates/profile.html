@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card profile-card">
+    <h1 class="card__title">个人中心</h1>
+
+    {% if error %}
+        <div class="alert alert--error">{{ error }}</div>
+    {% endif %}
+
+    {% if message %}
+        <div class="alert alert--success">{{ message }}</div>
+    {% endif %}
+
+    {% if profile_user %}
+        <ul class="user-list">
+            <li class="user-list__item"><span class="user-list__label">ID：</span>{{ profile_user.id }}</li>
+            <li class="user-list__item"><span class="user-list__label">用户名：</span>{{ profile_user.username }}</li>
+            <li class="user-list__item"><span class="user-list__label">邮箱：</span>{{ profile_user.email }}</li>
+            <li class="user-list__item"><span class="user-list__label">手机：</span>{{ profile_user.phone }}</li>
+            <li class="user-list__item"><span class="user-list__label">余额：</span>{{ profile_user.balance }}</li>
+        </ul>
+
+        <form class="form recharge-form" method="post" action="/recharge">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form__group">
+                <label class="form__label" for="amount">充值金额</label>
+                <input class="form__input" id="amount" type="number" min="0.01" max="100000" step="0.01" name="amount" required>
+            </div>
+            <button class="button" type="submit">充值</button>
+        </form>
+    {% else %}
+        <div class="alert alert--error">用户不存在</div>
+    {% endif %}
+</section>
+{% endblock %}
