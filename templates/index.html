@@ -16,6 +16,7 @@
         <div class="quick-actions">
             <a class="button button--link" href="/profile">个人中心</a>
             <a class="button button--link" href="/upload">上传头像</a>
+            <a class="button button--link" href="/page?name=help">帮助中心</a>
         </div>
 
         <form class="search-form" method="get" action="/search">
@@ -56,6 +57,15 @@
     <section class="card">
         <h1 class="card__title">请先登录</h1>
         <a class="button button--link" href="/login">去登录</a>
+        <a class="button button--link" href="/page?name=help">帮助中心</a>
+    </section>
+{% endif %}
+
+{% if page_content %}
+    <section class="card page-card">
+        <div class="page-content">
+            {{ page_content | safe }}
+        </div>
     </section>
 {% endif %}
 {% endblock %}

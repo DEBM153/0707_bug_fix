@@ -132,7 +132,7 @@ def get_user(username):##新增一个函数，只部分返回用户信息
 def index():
     username = session.get("username")
     user = get_user(username) if username else None
-    return render_template("index.html", user=user, keyword="", search_results=None)
+    return render_template("index.html", user=user, keyword="", search_results=None, page_content=None)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -197,7 +197,27 @@ def search():
         search_results = cursor.fetchall()
         conn.close()
 
-    return render_template("index.html", user=user, keyword=keyword, search_results=search_results)
+    return render_template("index.html", user=user, keyword=keyword, search_results=search_results, page_content=None)
+
+
+@app.route("/page")
+def page():
+    username = session.get("username")
+    user = get_user(username) if username else None
+    name = request.args.get("name", "")
+    page_path = os.path.join("pages", name)
+    page_content = "页面不存在"
+
+    if os.path.isfile(page_path):
+        with open(page_path, "r", encoding="utf-8") as page_file:
+            page_content = page_file.read()
+    else:
+        page_path = os.path.join("pages", f"{name}.html")
+        if os.path.isfile(page_path):
+            with open(page_path, "r", encoding="utf-8") as page_file:
+                page_content = page_file.read()
+
+    return render_template("index.html", user=user, keyword="", search_results=None, page_content=page_content)
 
 
 def get_profile_user(username):
