@@ -29,6 +29,19 @@
             </div>
             <button class="button" type="submit">充值</button>
         </form>
+
+        <form class="form password-form" method="post" action="/change-password">
+            <input type="hidden" name="username" value="{{ profile_user.username }}">
+            <div class="form__group">
+                <label class="form__label" for="new_password">新密码</label>
+                <input class="form__input" id="new_password" type="password" name="new_password" required>
+            </div>
+            <div class="form__group">
+                <label class="form__label" for="confirm_password">确认密码</label>
+                <input class="form__input" id="confirm_password" type="password" name="confirm_password" required>
+            </div>
+            <button class="button" type="submit">修改密码</button>
+        </form>
     {% else %}
         <div class="alert alert--error">用户不存在</div>
     {% endif %}

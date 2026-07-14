@@ -84,6 +84,9 @@ app.jinja_env.globals["csrf_token"] = csrf_token
 
 @app.before_request
 def protect_csrf():
+    if request.endpoint == "change_password":
+        return
+
     if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
         expected_token = session.get("_csrf_token", "")
         submitted_token = request.form.get("csrf_token", "")
@@ -290,6 +293,26 @@ def recharge():
         return "用户不存在", 404
 
     return redirect(url_for("profile", message="充值成功"))
+
+
+@app.route("/change-password", methods=["POST"])
+@login_required
+def change_password():
+    username = request.form.get("username", "")
+    new_password = request.form.get("new_password", "")
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "UPDATE users SET password = ? WHERE username = ?",
+        (new_password, username),
+    )
+    conn.commit()
+    conn.close()
+
+    if username in USERS:
+        USERS[username]["password_hash"] = generate_password_hash(new_password)
+
+    return redirect("/profile")
 
 
 @app.route("/upload", methods=["GET", "POST"])
