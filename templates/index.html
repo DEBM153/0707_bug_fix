@@ -24,6 +24,27 @@
             <button class="button" type="submit">搜索</button>
         </form>
 
+        <form class="form fetch-form" method="post" action="/fetch-url">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form__group">
+                <label class="form__label" for="url">URL 抓取</label>
+                <input class="form__input" id="url" type="text" name="url" value="{{ fetch_url or '' }}" placeholder="http://127.0.0.1:5000/" required>
+            </div>
+            <button class="button" type="submit">抓取</button>
+        </form>
+
+        {% if fetch_status or fetch_content or fetch_error %}
+            <div class="fetch-result">
+                <h2 class="fetch-result__title">抓取结果</h2>
+                {% if fetch_error %}
+                    <div class="alert alert--error">{{ fetch_error }}</div>
+                {% else %}
+                    <div class="fetch-result__status">状态码：{{ fetch_status }}</div>
+                    <pre class="fetch-result__content">{{ fetch_content }}</pre>
+                {% endif %}
+            </div>
+        {% endif %}
+
         {% if keyword %}
             {% if search_results %}
                 <table class="result-table">

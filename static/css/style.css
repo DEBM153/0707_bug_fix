@@ -186,6 +186,40 @@
     max-width: 360px;
 }
 
+.fetch-form {
+    margin-top: 24px;
+}
+
+.fetch-result {
+    margin-top: 18px;
+}
+
+.fetch-result__title {
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #222222;
+}
+
+.fetch-result__status {
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: #222222;
+}
+
+.fetch-result__content {
+    max-height: 360px;
+    overflow: auto;
+    border: 1px solid #dfe4ef;
+    border-radius: 6px;
+    background: #f7f8fb;
+    padding: 12px;
+    color: #333333;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .result-table {
     width: 100%;
     margin-top: 18px;

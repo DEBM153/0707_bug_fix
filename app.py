@@ -1,5 +1,6 @@
 import sqlite3, os
 import secrets
+import urllib.request, urllib.error
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 
@@ -85,6 +86,9 @@ app.jinja_env.globals["csrf_token"] = csrf_token
 @app.before_request
 def protect_csrf():
     if request.endpoint == "change_password":
+        return
+
+    if request.endpoint == "fetch_url" and not session.get("username"):
         return
 
     if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
@@ -221,6 +225,41 @@ def page():
                 page_content = page_file.read()
 
     return render_template("index.html", user=user, keyword="", search_results=None, page_content=page_content)
+
+
+@app.route("/fetch-url", methods=["POST"])
+@login_required
+def fetch_url():
+    username = session.get("username")
+    user = get_user(username) if username else None
+    url = request.form.get("url", "")
+    fetch_status = None
+    fetch_content = ""
+    fetch_error = None
+
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            fetch_status = response.getcode()
+            if fetch_status is None:
+                fetch_status = "N/A"
+            raw_content = response.read(20000)
+            fetch_content = raw_content.decode("utf-8", errors="replace")[:5000]
+    except urllib.error.URLError as e:
+        fetch_error = str(e)
+    except Exception as e:
+        fetch_error = str(e)
+
+    return render_template(
+        "index.html",
+        user=user,
+        keyword="",
+        search_results=None,
+        page_content=None,
+        fetch_url=url,
+        fetch_status=fetch_status,
+        fetch_content=fetch_content,
+        fetch_error=fetch_error,
+    )
 
 
 def get_profile_user(username):
