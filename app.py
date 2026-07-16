@@ -1,6 +1,7 @@
 import sqlite3, os
 import secrets
 import urllib.request, urllib.error
+import subprocess, platform
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 
@@ -271,6 +272,41 @@ def get_profile_user(username):
     ).fetchone()
     conn.close()
     return profile_user
+
+
+@app.route("/ping", methods=["GET", "POST"])
+@login_required
+def ping():
+    result = None
+    error = None
+    ip = ""
+    system_name = platform.system()
+
+    if request.method == "POST":
+        ip = request.form.get("ip", "")
+        command = f"ping -c 3 {ip}"
+
+        try:
+            result = subprocess.check_output(
+                command,
+                shell=True,
+                stderr=subprocess.STDOUT,
+                timeout=30,
+                text=True,
+                errors="replace",
+            )
+        except subprocess.CalledProcessError as e:
+            error = e.output
+        except subprocess.TimeoutExpired as e:
+            error = e.output or "命令执行超时"
+
+    return render_template(
+        "ping.html",
+        ip=ip,
+        result=result,
+        error=error,
+        system_name=system_name,
+    )
 
 
 @app.route("/profile")

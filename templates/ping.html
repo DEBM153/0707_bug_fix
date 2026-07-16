@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card ping-card">
+    <h1 class="card__title">Ping 测试</h1>
+
+    <form class="form" method="post" action="/ping">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form__group">
+            <label class="form__label" for="ip">IP 地址</label>
+            <input class="form__input" id="ip" type="text" name="ip" value="{{ ip }}" placeholder="127.0.0.1" required>
+        </div>
+        <button class="button" type="submit">Ping</button>
+    </form>
+
+    {% if result or error %}
+        <pre class="console-output">系统：{{ system_name }}
+
+{{ result or error }}</pre>
+    {% endif %}
+</section>
+{% endblock %}

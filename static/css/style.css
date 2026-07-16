@@ -68,6 +68,11 @@
     margin: 0 auto;
 }
 
+.ping-card {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
 .profile-card {
     max-width: 640px;
     margin: 0 auto;
@@ -218,6 +223,20 @@
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+.console-output {
+    margin-top: 20px;
+    border-radius: 6px;
+    background: #050505;
+    color: #39ff14;
+    padding: 16px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
 }
 
 .result-table {
