@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card xml-card">
+    <h1 class="card__title">XML 导入</h1>
+
+    <form class="form" method="post" action="/xml-import">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form__group">
+            <label class="form__label" for="xml_data">XML 数据</label>
+            <textarea class="form__input form__textarea" id="xml_data" name="xml_data" required>{{ xml_data }}</textarea>
+        </div>
+        <button class="button" type="submit">导入</button>
+    </form>
+
+    {% if result_json %}
+        <pre class="json-output">{{ result_json }}</pre>
+    {% endif %}
+</section>
+{% endblock %}

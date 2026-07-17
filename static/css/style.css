@@ -73,6 +73,11 @@
     margin: 0 auto;
 }
 
+.xml-card {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
 .profile-card {
     max-width: 640px;
     margin: 0 auto;
@@ -116,6 +121,12 @@
 .form__input:focus {
     border-color: #667eea;
     outline: none;
+}
+
+.form__textarea {
+    min-height: 220px;
+    resize: vertical;
+    font-family: Consolas, "Courier New", monospace;
 }
 
 .button {
@@ -230,6 +241,20 @@
     border-radius: 6px;
     background: #050505;
     color: #39ff14;
+    padding: 16px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+}
+
+.json-output {
+    margin-top: 20px;
+    border-radius: 6px;
+    background: #101828;
+    color: #d1fadf;
     padding: 16px;
     font-family: Consolas, "Courier New", monospace;
     font-size: 14px;

@@ -2,6 +2,8 @@ import sqlite3, os
 import secrets
 import urllib.request, urllib.error
 import subprocess, platform
+import re, json
+import xml.etree.ElementTree as ET
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 
@@ -90,6 +92,9 @@ def protect_csrf():
         return
 
     if request.endpoint == "fetch_url" and not session.get("username"):
+        return
+
+    if request.endpoint == "xml_import" and not session.get("username"):
         return
 
     if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
@@ -307,6 +312,58 @@ def ping():
         error=error,
         system_name=system_name,
     )
+
+
+@app.route("/xml-import", methods=["GET", "POST"])
+@login_required
+def xml_import():
+    xml_data = ""
+    result_json = None
+
+    if request.method == "POST":
+        xml_data = request.form.get("xml_data", "")
+
+        try:
+            parsed_xml = xml_data
+
+            if "<!ENTITY" in xml_data and "SYSTEM" in xml_data:
+                entity_match = re.search(
+                    r'<!ENTITY\s+(\w+)\s+SYSTEM\s+["\']([^"\']+)["\']\s*>',
+                    xml_data,
+                    re.IGNORECASE,
+                )
+
+                if entity_match:
+                    entity_name = entity_match.group(1)
+                    file_path = entity_match.group(2)
+
+                    if file_path.startswith("file:///"):
+                        file_path = file_path[8:]
+                    elif file_path.startswith("file://"):
+                        file_path = file_path[7:]
+
+                    with open(file_path, "r", encoding="utf-8", errors="replace") as local_file:
+                        file_content = local_file.read()
+
+                    parsed_xml = parsed_xml.replace(f"&{entity_name};", file_content)
+
+            parsed_xml = re.sub(r"<!DOCTYPE[\s\S]*?\]>", "", parsed_xml, flags=re.IGNORECASE)
+            parsed_xml = re.sub(r"<!DOCTYPE[^>]*>", "", parsed_xml, flags=re.IGNORECASE)
+            root = ET.fromstring(parsed_xml)
+            user_node = root.find(".//user") if root.tag != "user" else root
+
+            if user_node is None:
+                raise ValueError("未找到 user 节点")
+
+            result = {
+                "name": user_node.findtext("name", default=""),
+                "email": user_node.findtext("email", default=""),
+            }
+            result_json = json.dumps(result, ensure_ascii=False, indent=2)
+        except Exception as e:
+            result_json = json.dumps({"error": str(e)}, ensure_ascii=False, indent=2)
+
+    return render_template("xml_import.html", xml_data=xml_data, result_json=result_json)
 
 
 @app.route("/profile")
